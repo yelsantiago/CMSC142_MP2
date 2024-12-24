@@ -1,8 +1,11 @@
 import random
+import sys
+
+sys.setrecursionlimit(100000000)
 
 def randomItemGen(n):
     items = []
-    for i in range(n):
+    for _ in range(n):
         items.append((random.randint(100, 1500), random.randint(100, 500)))
     return items
 
@@ -63,7 +66,7 @@ def experimentParameters():
     while i <= 100000:
         items = randomItemGen(i)
         print(DPKnapsack(items))
-        # print(DPMFKnapsack(items))
+        print(DPMFKnapsack(items))
         print(VRGreedyKnapsack(items))
         i = i * 10
 
