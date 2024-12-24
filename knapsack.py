@@ -9,6 +9,11 @@ def randomItemGen(n):
         items.append((random.randint(100, 1500), random.randint(100, 500)))
     return items
 
+class Item:
+    def __init__(self, value, weight):
+        self.value = value
+        self.weight = weight
+        
 def DPKnapsack(items, WEIGHT=1000):
     V = [[0 for _ in range(WEIGHT+1)] for _ in range(len(items)+1)]
     for i in range(1, len(items)+1):
@@ -36,6 +41,28 @@ def DPMFKnapsack(items, WEIGHT=1000):
     recurse(len(items), WEIGHT)
     return V[len(items)][WEIGHT]
 
+
+def greedyKnapsack1(items, WEIGHT=1000):
+    arr = [Item(value, weight) for weight, value in items]
+    arr.sort(key=lambda x: x.value, reverse=True)
+    total_value = 0
+    for item in arr:
+        if item.weight <= WEIGHT:
+            WEIGHT -= item.weight
+            total_value += item.value
+    return total_value
+
+def greedyKnapsack2(items, WEIGHT = 1000):
+    arr = [Item(value, weight) for weight, value in items]
+    arr.sort(key=lambda x: x.weight)
+    total_value = 0
+    for item in arr:
+        if item.weight <= WEIGHT:
+            WEIGHT -= item.weight
+            total_value += item.value
+    return total_value
+    
+
 def VRGreedyKnapsack(items, WEIGHT=1000):
     ratio = []
     for item in items:
@@ -59,6 +86,8 @@ def validityChecker():
     items1 = [(2, 12), (1, 10), (3, 20), (2, 15)]
     print(DPKnapsack(items1, 5))
     print(DPMFKnapsack(items1, 5))
+    print(greedyKnapsack1(items1,5))
+    print(greedyKnapsack2(items1,5))
     print(VRGreedyKnapsack(items1, 5))
 
 def experimentParameters():
@@ -67,6 +96,8 @@ def experimentParameters():
         items = randomItemGen(i)
         print(DPKnapsack(items))
         print(DPMFKnapsack(items))
+        print(greedyKnapsack1(items))
+        print(greedyKnapsack2(items))
         print(VRGreedyKnapsack(items))
         i = i * 10
 
