@@ -63,8 +63,9 @@ def experimentParameters():
     while i <= 100000:
         items = randomItemGen(i)
         print(DPKnapsack(items))
-        print(DPMFKnapsack(items))
+        # print(DPMFKnapsack(items))
+        print(VRGreedyKnapsack(items))
         i = i * 10
 
 validityChecker()
-# experimentParameters()
+experimentParameters()
