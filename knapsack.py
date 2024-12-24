@@ -1,5 +1,7 @@
 import random
+import time
 import sys
+import numpy as np 
 
 sys.setrecursionlimit(100000000)
 
@@ -86,17 +88,62 @@ def validityChecker():
     print(greedyKnapsack1(items1,5))
     print(greedyKnapsack2(items1,5))
     print(VRGreedyKnapsack(items1, 5))
+    
+def algo_runtime(algorithm, items):
+    start = time.time()
+    result = algorithm(items)
+    end = time.time()
+    return(end-start)* 10**3 
 
 def experimentParameters():
+    algorithms = [
+        ('DPKnapsack', DPKnapsack),
+        ('DPMFKnapsack', DPMFKnapsack),
+        ('GreedyKnapsack1', greedyKnapsack1),
+        ('GreedyKnapsack2', greedyKnapsack2),
+        ('VRGreedyKnapsack', VRGreedyKnapsack)
+    ]
+    
+    num_runs = 3
+    results = {algo[0]: [] for algo in algorithms}
+    
+    
     i = 100
     while i <= 100000:
+        print(f"\nTest for {i} items...")
         items = randomItemGen(i)
-        print(DPKnapsack(items))
-        print(DPMFKnapsack(items))
-        print(greedyKnapsack1(items))
-        print(greedyKnapsack2(items))
-        print(VRGreedyKnapsack(items))
-        i = i * 10
-
+        
+        for name, algorithm in algorithms:
+            times = []
+            for _ in range(num_runs):
+                run_time = algo_runtime(algorithm, items)
+                times.append(run_time)
+                
+            avg_runtime = np.mean(times)
+            results[name].append(avg_runtime)
+        
+            output = algorithm(items)
+            print(f"{name}: Output={output}, Avg Time={avg_runtime:.2f} ms")
+                
+        # print(DPKnapsack(items))
+        # print(DPMFKnapsack(items))
+        # print(greedyKnapsack1(items))
+        # print(greedyKnapsack2(items))
+        # print(VRGreedyKnapsack(items))
+            
+        i = i * 10 
+    
+    print("\nResults (ms):")
+    print(f"{'Algorithm':<20}", end="")
+    print("100       1000      10000     100000")
+    for name in algorithms:
+        avg_times = results[name[0]]
+        print(f"{name[0]:<20}", end="")
+        for time in avg_times:
+            print(f"{time:<10.2f}", end="")
+        print()
+    
+        
 validityChecker()
+experimentParameters()
 # experimentParameters()
