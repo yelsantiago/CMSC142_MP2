@@ -19,7 +19,7 @@ def DPKnapsack(items, WEIGHT=1000):
                 V[i][j] = max(V[i-1][j], items[i-1][1] + V[i-1][j - items[i-1][0]])
             else:
                 V[i][j] = V[i-1][j]
-    return V[len(items)][WEIGHT]
+    return V[len(items)][WEIGHT], V
 
 def DPMFKnapsack(items, WEIGHT=1000):
     V = [[-1 for _ in range(WEIGHT+1)] for _ in range(len(items)+1)]
@@ -36,32 +36,46 @@ def DPMFKnapsack(items, WEIGHT=1000):
             V[i][j] = value
         return V[i][j]
     recurse(len(items), WEIGHT)
-    return V[len(items)][WEIGHT]
+    return V[len(items)][WEIGHT], V
 
+def DPKnapsackBacktracking(items, DP, WEIGHT=1000):
+    included = []
+    for i in range(len(items), 0, -1):
+        if DP[i][WEIGHT] != DP[i - 1][WEIGHT]:
+            included.append(items[i - 1])
+            WEIGHT -= items[i - 1][0]
+    included.reverse()
+    return included
 
-def greedyKnapsack1(items, WEIGHT=1000):
-    arr = items
+def LVGreedyKnapsack(items, WEIGHT=1000):
+    arr = items.copy()
     arr.sort(key=lambda tup: tup[1], reverse=True)
     total_value = 0
     included = []
-    for item in arr:
-        if item[0] <= WEIGHT:
-            WEIGHT -= item[0]
-            total_value += item[1]
-            included.append(item)
-    return total_value
+    while arr and WEIGHT != 0:
+        if arr[0][0] <= WEIGHT:
+            WEIGHT -= arr[0][0]
+            total_value += arr[0][1]
+            included.append(arr)
+            arr.pop(0)
+        else:
+            arr.pop(0)
+    return total_value, included
 
-def greedyKnapsack2(items, WEIGHT = 1000):
-    arr = items
+def SWGreedyKnapsack(items, WEIGHT = 1000):
+    arr = items.copy()
     arr.sort(key=lambda tup: tup[0])
     total_value = 0
     included = []
-    for item in arr:
-        if item[0] <= WEIGHT:
-            WEIGHT -= item[0]
-            total_value += item[1]
-            included.append(item)
-    return total_value
+    while arr and WEIGHT != 0:
+        if arr[0][0] <= WEIGHT:
+            WEIGHT -= arr[0][0]
+            total_value += arr[0][1]
+            included.append(arr)
+            arr.pop(0)
+        else:
+            arr.pop(0)
+    return total_value, included
     
 def VRGreedyKnapsack(items, WEIGHT=1000):
     ratio = []
@@ -79,58 +93,52 @@ def VRGreedyKnapsack(items, WEIGHT=1000):
             ratio.pop(0)
         else:
             ratio.pop(0)
-    return value
+    return value, included
 
 def validityChecker():
     items1 = [(2, 12), (1, 10), (3, 20), (2, 15)]
     print(DPKnapsack(items1, 5))
     print(DPMFKnapsack(items1, 5))
-    print(greedyKnapsack1(items1,5))
-    print(greedyKnapsack2(items1,5))
+    DP = DPKnapsack(items1, 5)[1]
+    print(DPKnapsackBacktracking(items1, DP, 5))
+    print(LVGreedyKnapsack(items1,5))
+    print(SWGreedyKnapsack(items1,5))
     print(VRGreedyKnapsack(items1, 5))
     
 def algo_runtime(algorithm, items):
     start = time.time()
     result = algorithm(items)
     end = time.time()
-    return(end-start)* 10**3 
+    return(end-start)* 10**3, result[0], result[1]
 
 def experimentParameters():
     algorithms = [
         ('DPKnapsack', DPKnapsack),
         ('DPMFKnapsack', DPMFKnapsack),
-        ('GreedyKnapsack1', greedyKnapsack1),
-        ('GreedyKnapsack2', greedyKnapsack2),
-        ('VRGreedyKnapsack', VRGreedyKnapsack)
+        ('LargestValueKnapsack',LVGreedyKnapsack),
+        ('SmallestWeightKnapsack', SWGreedyKnapsack),
+        ('ValueRatioKnapsack', VRGreedyKnapsack)
     ]
     
     num_runs = 3
     results = {algo[0]: [] for algo in algorithms}
-    
-    
     i = 100
     while i <= 100000:
         print(f"\nTest for {i} items...")
         items = randomItemGen(i)
-        
+        print(f"{'Algorithm':<30}{'Computed Value':<20}{'Trial 1':<20}{'Trial 2':<20}{'Trial 3':<20}{'Ave. Runtime':<20}")
         for name, algorithm in algorithms:
             times = []
             for _ in range(num_runs):
-                run_time = algo_runtime(algorithm, items)
+                result = algo_runtime(algorithm, items)
+                run_time = result[0]
                 times.append(run_time)
                 
             avg_runtime = np.mean(times)
             results[name].append(avg_runtime)
         
-            output = algorithm(items)
-            print(f"{name}: Output={output}, Avg Time={avg_runtime:.2f} ms")
+            print(f"{name:<30}{result[1]:<20}{times[0]:<20}{times[1]:<20}{times[2]:<20}{avg_runtime:<20} ")
                 
-        # print(DPKnapsack(items))
-        # print(DPMFKnapsack(items))
-        # print(greedyKnapsack1(items))
-        # print(greedyKnapsack2(items))
-        # print(VRGreedyKnapsack(items))
-            
         i = i * 10 
     
     print("\nResults (ms):")
@@ -142,8 +150,6 @@ def experimentParameters():
         for time in avg_times:
             print(f"{time:<10.2f}", end="")
         print()
-    
         
 validityChecker()
 experimentParameters()
-# experimentParameters()
