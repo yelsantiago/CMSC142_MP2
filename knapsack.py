@@ -109,7 +109,7 @@ def algo_runtime(algorithm, items):
     start = time.time()
     result = algorithm(items)
     end = time.time()
-    return(end-start)* 10**3 
+    return(end-start)* 10**3, result[0], result[1]
 
 def experimentParameters():
     algorithms = [
@@ -122,24 +122,23 @@ def experimentParameters():
     
     num_runs = 3
     results = {algo[0]: [] for algo in algorithms}
-    
-    
+
     i = 100
     while i <= 100000:
         print(f"\nTest for {i} items...")
         items = randomItemGen(i)
-        
+        print(f"{'Algorithm':<30}{'Computed Value':<20}{'Trial 1':<20}{'Trial 2':<20}{'Trial 3':<20}{'Ave. Runtime':<20}")
         for name, algorithm in algorithms:
             times = []
             for _ in range(num_runs):
-                run_time = algo_runtime(algorithm, items)
+                result = algo_runtime(algorithm, items)
+                run_time = result[0]
                 times.append(run_time)
                 
             avg_runtime = np.mean(times)
             results[name].append(avg_runtime)
         
-            output = algorithm(items)[0]
-            print(f"{name}: Output={output}, Avg Time={avg_runtime:.2f} ms")
+            print(f"{name:<30}{result[1]:<20}{times[0]:<20}{times[1]:<20}{times[2]:<20}{avg_runtime:<20} ")
                 
         i = i * 10 
     
